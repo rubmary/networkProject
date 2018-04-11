@@ -4,6 +4,7 @@ import threading
 import time
 import xmlrpclib
 from SimpleXMLRPCServer import SimpleXMLRPCServer
+nameFile = "availableBooks.txt"
 
 
 def checkBook(book):
@@ -11,14 +12,15 @@ def checkBook(book):
 	print("checking book in server")
 	for b in server.books:
 		if (b == book):
-			print(b)
-			print(book)
 			return True
 	return False
 
 def transferData(book):
 	# HACER HILOS PROBABLEMENTE
 	time.sleep(3)
+
+def booksList():
+	return server.books
 
 class DownloadServer(threading.Thread):
 	def run(self):
@@ -32,10 +34,11 @@ class Server:
 	def __init__(self, central = "http://localhost:8000", server = "http://localhost:8121"):
 		self.proxy  = xmlrpclib.ServerProxy(central)
 		self.proxy.registerServer(server)
-
 		self.downloadServer = DownloadServer()
 		self.downloadServer.start()
-		self.books = ["hola", "chao", "1", "3", "16"]
+		file = open(nameFile, 'r')
+		books = file.readlines()
+		self.books = [b.strip() for b in books]
 
 	def printBooks(self):
 		print("Los libros disponibles son: ")

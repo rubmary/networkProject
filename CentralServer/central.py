@@ -21,6 +21,19 @@ def registerServer(server):
 	servers.append(server)
 	return "ok"
 
+def serversBooks():
+	allBooks = []
+	for server in servers:
+		try:
+			proxy = xmlrpclib.ServerProxy(server)
+			books = proxy.booksList()
+			allBooks.append(books)
+		except:
+			books.append([])
+
+def getServers():
+	return servers
+
 # Tipos de updates:
 # 0 -> Se solicitud un libro a un servidor
 # 1 -> Un servidor atendio a un cliente
@@ -77,6 +90,7 @@ class CentralServer(threading.Thread):
 		server.register_function(registerServer,   "registerServer")
 		server.register_function(requestBook,      "requestBook")
 		server.register_function(updateStatistics, "updateStatistics")
+		server.register_function(getServers,       "getServers")
 		server.serve_forever()
 
 
