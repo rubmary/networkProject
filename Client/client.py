@@ -1,61 +1,76 @@
-import xmlrpclib
+from xmlrpclib import ServerProxy
 from os import remove
+from time import sleep
+from thread import start_new_thread
 
-messages = [ "1. Lista de libros",
-			 "2. Solicitar libros" ]
-
+messages = [ "1. Listar libros.",
+			 "2. Solicitar libro." ]
 
 class Client:
 	def __init__(self, central = "http://localhost:8000", client = "c"):
-		self.proxy  = xmlrpclib.ServerProxy(central)
+		self.proxy = ServerProxy(central)
 		self.proxy.registerClient(client)
 
 	def downloadBook(self, book):
 		servers = self.proxy.requestBook("rubmary", book)
 		if (servers):
-			print("El libro esta disponible en los servidores.")
-			print(servers)
-			# Manejar posible caida.
-			downloadServer = xmlrpclib.ServerProxy(servers[0])
-			size = downloadServer.bookSize(book)
-			print(size)
-			path = "Libros Descargados/" + book + ".pdf"
-			downloadFile = open(path,'wb')
-			successfulDownload = True
+			print(book + " esta disponible en los servidores.")
 			nServers = len(servers)
-			chunkSize = size/nServers
+			successfulDownload = True
 			totalTries = 0
 			triesPerServer = 0
 			i = 0
-			actualChunck = 1
-			while(actualChunck <= nServers):
+			while(successfulDownload):
 				try:
 					if (totalTries < nServers * 2):
-						if (triesPerServer < 3):
-							downloadServer = xmlrpclib.ServerProxy(servers[i])
-							binary = downloadServer.transferData(book, chunkSize, actualChunck, actualChunck==nServers)
-							print(len(binary.data))
-							downloadFile.write(binary.data)
-							actualChunck = actualChunck + 1
+						if (triesPerServer < 2):
+							downloadServer = ServerProxy(servers[i])
+							size = downloadServer.bookSize(book)
+							break
 						else:
 							totalTries = totalTries + 1
-							print("No se logro establecer conexion con el servidor de descarga " + servers[i])
+							print("No se logro establecer conexion con el servidor de descarga " + servers[i] + ".")
 						i = (i + 1) % nServers
 						triesPerServer = 0
 					else:
 						successfulDownload = False
 				except:
 					triesPerServer = triesPerServer + 1
-					#wait(1)
+					sleep(1)
+			path = "Libros Descargados/" + book + ".pdf"
+			downloadFile = open(path,'wb')
+			chunkSize = size/nServers
+			totalTries = 0
+			triesPerServer = 0
+			i = 0
+			actualChunck = 1
+			while(actualChunck <= nServers and successfulDownload):
+				try:
+					if (totalTries < nServers * 2):
+						if (triesPerServer < 3):
+							downloadServer = ServerProxy(servers[i])
+							binary = downloadServer.transferData(book, chunkSize, actualChunck, actualChunck==nServers)
+							downloadFile.write(binary.data)
+							actualChunck = actualChunck + 1
+						else:
+							totalTries = totalTries + 1
+							print("No se logro establecer conexion con el servidor de descarga " + servers[i] + ".")
+						i = (i + 1) % nServers
+						triesPerServer = 0
+					else:
+						successfulDownload = False
+				except:
+					triesPerServer = triesPerServer + 1
+					sleep(1)
 			downloadFile.close()
 			if (successfulDownload):
-				print("Descarga exitosa.")
+				print("Descarga exitosa de " + book + ".")
 			else:
 				remove(path)		
 				print("No se logro establecer conexion con ningun servidor de descarga.")
-				print("Descarga fallida.")		
+				print("Descarga fallida de " + book + ".")		
 		else:
-			print("El libro no esta disponible en ningun servidores.")
+			print(book + " no esta disponible en ningun servidor.")
 
 	def getBooks(self):
 		serversBooks = self.proxy.serversBooks()
@@ -85,9 +100,8 @@ class Client:
 			elif(option == '2'):
 				book = raw_input("Escriba el nombre del libro: ")
 				# Ejecutar esto en un hilo.
-				servers = self.downloadBook(book)
+				start_new_thread(self.downloadBook,(book,))
 
-				
 if __name__ == '__main__':
 	client = Client()
 	client.run()

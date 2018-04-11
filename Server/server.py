@@ -81,7 +81,7 @@ class DownloadServer(threading.Thread):
 
 class Server:
 	def __init__(self, central = "http://localhost:8000", server = "http://localhost:8121"):
-		self.proxy  = ServerProxy(central)
+		self.proxy = ServerProxy(central)
 		self.proxy.registerServer(server)
 		self.downloadServer = DownloadServer()
 		self.downloadServer.start()
