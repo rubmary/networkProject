@@ -1,0 +1,2 @@
+{'Liubliana': 7, 'Ni Dios ni amo': 8, 'Memorias de una Geisha': 2}
+{'Anthony': 1, 'Rubmary': 7, 'Samuel': 2, 'Eliot': 4}
