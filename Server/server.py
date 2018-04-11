@@ -53,6 +53,7 @@ class DownloadServer(threading.Thread):
 		server.register_function(checkBook,    "checkBook")
 		server.register_function(transferData, "transferData")
 		server.register_function(booksList,    "booksList")
+		server.register_function(updateStatistics, "updateStatistics")
 		server.serve_forever()
 
 
