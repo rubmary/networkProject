@@ -22,6 +22,7 @@ def registerServer(server):
 	return "ok"
 
 def serversBooks():
+	print("Client is in serversBooks")
 	allBooks = []
 	for server in servers:
 		try:
@@ -29,7 +30,8 @@ def serversBooks():
 			books = proxy.booksList()
 			allBooks.append(books)
 		except:
-			books.append([])
+			allBooks.append([])
+	return allBooks
 
 def getServers():
 	return servers
@@ -91,6 +93,7 @@ class CentralServer(threading.Thread):
 		server.register_function(requestBook,      "requestBook")
 		server.register_function(updateStatistics, "updateStatistics")
 		server.register_function(getServers,       "getServers")
+		server.register_function(serversBooks,     "serversBooks")
 		server.serve_forever()
 
 

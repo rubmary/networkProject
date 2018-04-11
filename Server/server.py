@@ -27,6 +27,7 @@ class DownloadServer(threading.Thread):
 		server  = SimpleXMLRPCServer(("localhost", 8121))
 		server.register_function(checkBook,    "checkBook")
 		server.register_function(transferData, "transferData")
+		server.register_function(booksList,    "booksList")
 		server.serve_forever()
 
 
