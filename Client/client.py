@@ -32,10 +32,10 @@ def transferData(params):
 			triesPerServer = triesPerServer + 1
 			sleep(1)
 	try:
-		proxy = ServerProxy(central)
+		proxy = ServerProxy(centralServerDir)
 		proxy.updateStatistics(2,downloadServer)
 	except:
-		print("No se logro establecer conexion con el servidor central.")
+		#print("No se logro establecer conexion con el servidor central.")
 	print("No se logro establecer conexion con el servidor de descarga " + server + ".")
 	return False
 
@@ -112,7 +112,7 @@ class Client:
 						 actualChuncks[i],
 						 actualChuncks[i] == nServers,
 						 centralServerDir ] 
-						for i in range(nServers) ]
+						for i in range(min(len(servers), len(actualChuncks))) ]
 				
 				p = Pool(5)
 				results = p.map(transferData, params)
