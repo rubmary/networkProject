@@ -12,12 +12,10 @@ messages = [ "1. Libros solicitados por servidor de descarga.",
 			 "3. Servidores de descarga que se han caido." ]
 
 def registerClient(client):
-	# REGION CRITICA
 	clients.append(client)
 	return "ok"
 
 def registerServer(server):
-	# REGION CRITICA
 	servers.append(server)
 	return "ok"
 
