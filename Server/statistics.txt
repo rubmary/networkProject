@@ -1,2 +1,2 @@
-{'Liubliana': 7, 'Ni Dios ni amo': 8, 'Memorias de una Geisha': 2}
-{'Anthony': 1, 'Rubmary': 7, 'Samuel': 2, 'Eliot': 4}
+{'Liubliana': 7, 'Ni Dios ni amo': 8, 'Memorias de una Geisha': 2, 'Contest02RPC2018': 1, 'Contest02RPC2018-1': 2}
+{'Anthony': 1, 'Rubmary': 7, 'c': 3, 'Samuel': 2, 'Eliot': 4}

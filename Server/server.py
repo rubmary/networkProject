@@ -3,9 +3,12 @@ from __future__ import print_function
 import threading
 import time
 from xmlrpclib import ServerProxy, Binary
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+from SimpleXMLRPCServer import SimpleXMLRPCServer,SimpleXMLRPCRequestHandler
+import SocketServer
 from os import stat,walk
 from ast import literal_eval
+
+class AsyncXMLRPCServer(SocketServer.ThreadingMixIn,SimpleXMLRPCServer): pass
 
 centralServerDir = "http://localhost:8000"
 serverDir = "http://localhost:8121"
@@ -82,7 +85,7 @@ def updateStatistics(option, name):
 
 class DownloadServer(threading.Thread):
 	def run(self):
-		server = SimpleXMLRPCServer(("localhost", 8121))
+		server = AsyncXMLRPCServer(("localhost", 8121), SimpleXMLRPCRequestHandler)
 		server.register_function(checkBook,    "checkBook")
 		server.register_function(transferData, "transferData")
 		server.register_function(booksList,    "booksList")
