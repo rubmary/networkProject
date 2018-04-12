@@ -35,7 +35,7 @@ def transferData(params):
 		proxy = ServerProxy(centralServerDir)
 		proxy.updateStatistics(2,downloadServer)
 	except:
-		#print("No se logro establecer conexion con el servidor central.")
+		pass
 	print("No se logro establecer conexion con el servidor de descarga " + server + ".")
 	return False
 
@@ -119,7 +119,7 @@ class Client:
 				for i in range(len(actualChuncks)):
 					fileChunks[actualChuncks[i]-1] = results[i]
 				
-				actualChuncks = [ i + 1 for i in range(nServers) if results[i] == False]				
+				actualChuncks = [ i + 1 for i in range(len(servers)) if results[i] == False]				
 				if (not actualChuncks):
 					break
 
