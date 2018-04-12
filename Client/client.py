@@ -4,8 +4,10 @@ from time import sleep
 from thread import start_new_thread
 from multiprocessing import Pool
 from sys import exit
+import socket
 
-centralServerDir = "http://localhost:8000"
+
+centralServerDir = "http://159.90.9.10:9513"
 messages = [ "1. Listar libros.",
 			 "2. Solicitar libro." ]
 
@@ -18,7 +20,6 @@ def transferData(params):
 	actualChunck   = params[4]
 	last           = params[5]
 	central        = params[6]
-	print("PARMAS")
 	triesPerServer = 0
 	downloadServer = ServerProxy(server)
 	while(triesPerServer < 3):
@@ -40,7 +41,9 @@ def transferData(params):
 
 
 class Client:
-	def __init__(self, central = centralServerDir, name = "c"):
+	def __init__(self, central = centralServerDir,):
+		name = raw_input("Ingrese su nombre: ")
+		name = name + "-159.90.9.14"
 		self.clientName = name
 		try:
 			self.proxy = ServerProxy(central)
@@ -57,8 +60,7 @@ class Client:
 
 		if (not servers):
 			print(book + " no esta disponible en ningun servidor.")
-		else:
-			
+		else:		
 			print(book + " esta disponible en los servidores.")
 			nServers = len(servers)
 			successfulDownload = True
@@ -113,7 +115,6 @@ class Client:
 						for i in range(nServers) ]
 				
 				p = Pool(5)
-				print(params)
 				results = p.map(transferData, params)
 				for i in range(len(actualChuncks)):
 					fileChunks[actualChuncks[i]-1] = results[i]
