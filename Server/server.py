@@ -7,6 +7,7 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer,SimpleXMLRPCRequestHandler
 import SocketServer
 from os import stat,walk
 from ast import literal_eval
+from sys import exit
 
 class AsyncXMLRPCServer(SocketServer.ThreadingMixIn,SimpleXMLRPCServer): pass
 
@@ -98,11 +99,15 @@ class DownloadServer(threading.Thread):
 
 class Server:
 	def __init__(self, central = centralServerDir, server = serverDir):
-		self.proxy = ServerProxy(centralServerDir)
-		self.proxy.registerServer(serverDir)
-		self.downloadServer = DownloadServer()
-		self.downloadServer.start()
-		self.books = uploadBookList()
+		try:
+			self.proxy = ServerProxy(centralServerDir)
+			self.proxy.registerServer(serverDir)
+			self.downloadServer = DownloadServer()
+			self.downloadServer.start()
+			self.books = uploadBookList()
+		except:
+			print("No se logro establecer conexion con el servidor central.")
+			exit()
 
 	def printBooks(self):
 		print("Los libros disponibles son: ")
