@@ -7,7 +7,8 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer
 from os import stat,walk
 from ast import literal_eval
 
-nameFile = "availableBooks.txt"
+centralServerDir = "http://localhost:8000"
+serverDir = "http://localhost:8121"
 nameFileStatics = "statistics.txt"
 messages = [ "1. Libros en descarga",
 			 "2. Libros descargados",
@@ -51,6 +52,8 @@ def booksList():
 
 def updateStatistics(option, name):
 	# REGION CRITICA
+	print(option)
+	print(name)
 	file = open(nameFileStatics, 'r')
 	statistics = file.readlines()
 	books      = literal_eval(statistics[0])
@@ -60,6 +63,11 @@ def updateStatistics(option, name):
 		if not (name in books):
 			books[name] = 0
 		books[name] = books[name] + 1
+		try:
+			centralServer = ServerProxy(centralServerDir)
+			centralServer.updateStatistics(0, serverDir, name)
+		except:
+			print("No se logro establecer conexion con el servidor central.")
 	else:
 		if not (name in clients):
 			clients[name] = 0
@@ -68,6 +76,7 @@ def updateStatistics(option, name):
 	file.write(str(books)   + '\n')
 	file.write(str(clients) + '\n')
 	file.close()
+	return "ACK"
 
 class DownloadServer(threading.Thread):
 	def run(self):
@@ -80,9 +89,9 @@ class DownloadServer(threading.Thread):
 		server.serve_forever()
 
 class Server:
-	def __init__(self, central = "http://localhost:8000", server = "http://localhost:8121"):
-		self.proxy = ServerProxy(central)
-		self.proxy.registerServer(server)
+	def __init__(self, central = centralServerDir, server = serverDir):
+		self.proxy = ServerProxy(centralServerDir)
+		self.proxy.registerServer(serverDir)
 		self.downloadServer = DownloadServer()
 		self.downloadServer.start()
 		self.books = uploadBookList()

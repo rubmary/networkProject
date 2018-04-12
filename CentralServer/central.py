@@ -7,9 +7,9 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer
 from ast import *
 
 nameFile = 'statistics.txt'
-messages = [ "1. Libros solicitados por servidor de descarga",
-			 "2. Clientes atendidos por servidor de descarga",
-			 "3. Servidores de descarga que se han caido" ]
+messages = [ "1. Libros solicitados por servidor de descarga.",
+			 "2. Numero de clientes atendidos por servidor de descarga.",
+			 "3. Servidores de descarga que se han caido." ]
 
 def registerClient(client):
 	# REGION CRITICA
@@ -54,7 +54,6 @@ def updateStatistics(option, server, book = ""):
 		if (not book in serverBooks[server]):
 			serverBooks[server][book] = 0
 		serverBooks[server][book] = serverBooks[server][book] + 1
-	elif (option == 1):
 		if not (server in serverClients):
 			serverClients[server] = 0
 		serverClients[server] = serverClients[server] + 1
@@ -67,10 +66,11 @@ def updateStatistics(option, server, book = ""):
 	file.write(str(serverClients) + '\n')
 	file.write(str(downServers)   + '\n')
 	file.close()
+	return "ACK"
 
-def requestBook(client, book):
+def requestBook(clientName, book):
 	# CREO QUE TENEMOS QUE PONER ESTO EN UN HILO PARA QUE SEA CONCURRENTE
-	print("Client: " + str(client) + " is resquesting a book")
+	print("Client: " + str(clientName) + " is resquesting a book")
 	availableServers = []
 	for server in servers:
 		try:
