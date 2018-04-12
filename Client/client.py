@@ -57,8 +57,8 @@ class Client:
 							downloadServer = ServerProxy(servers[i])
 							binary = downloadServer.transferData(self. clientName, book, chunkSize, actualChunck, actualChunck==nServers)
 							downloadFile.write(binary.data)
-							downloadServer.updateStatistics(0,book)
-							downloadServer.updateStatistics(1,self.clientName)
+							downloadServer.updateStatistics(0,self.clientName, book)
+							downloadServer.updateStatistics(1,self.clientName, book)
 							actualChunck = actualChunck + 1
 						else:
 							totalTries = totalTries + 1

@@ -54,7 +54,7 @@ def transferData(client, book, chunkSize, actualChunk, isLast):
 def booksList():
 	return server.books
 
-def updateStatistics(option, name):
+def updateStatistics(option, clientName, bookName):
 	# REGION CRITICA
 	file = open(nameFileStatics, 'r')
 	statistics = file.readlines()
@@ -62,18 +62,21 @@ def updateStatistics(option, name):
 	clients    = literal_eval(statistics[1])
 	file.close()
 	if (option == 0):
-		if not (name in books):
-			books[name] = 0
-		books[name] = books[name] + 1
+		currentDownloads[clientName].remove(bookName)
+		if (not currentDownloads[clientName]):
+			del currentDownloads[clientName]
+		if not (bookName in books):
+			books[bookName] = 0
+		books[bookName] = books[bookName] + 1
 		try:
 			centralServer = ServerProxy(centralServerDir)
-			centralServer.updateStatistics(0, serverDir, name)
+			centralServer.updateStatistics(0, serverDir, bookName)
 		except:
 			print("No se logro establecer conexion con el servidor central.")
 	else:
-		if not (name in clients):
-			clients[name] = 0
-		clients[name] = clients[name] + 1
+		if not (clientName in clients):
+			clients[clientName] = 0
+		clients[clientName] = clients[clientName] + 1
 	file = open(nameFileStatics, 'w')
 	file.write(str(books)   + '\n')
 	file.write(str(clients) + '\n')
@@ -105,7 +108,7 @@ class Server:
 
 	# Muestra las estadisticas segun la opcion elegida
 	def showStatistics(self, option):
-		if (option == 1):
+		if (option == '1'):
 			for client in currentDownloads:
 				print(client)
 				for book in currentDownloads[client]:

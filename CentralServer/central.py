@@ -105,7 +105,7 @@ class Summary():
 		data = literal_eval(statistics[int(option)-1])
 		if (option == '1'):
 			for server in data:
-				print(server)
+				print(server + ":")
 				for book in data[server]:
 					print("\t" + book + ": " + str(data[server][book]))
 		else:
