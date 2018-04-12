@@ -10,9 +10,10 @@ from ast import literal_eval
 centralServerDir = "http://localhost:8000"
 serverDir = "http://localhost:8121"
 nameFileStatics = "statistics.txt"
-messages = [ "1. Libros en descarga",
-			 "2. Libros descargados",
-			 "3. Estadisticas de clientes" ]
+messages = [ "1. Libros en descarga.",
+			 "2. Libros descargados.",
+			 "3. Estadisticas de clientes." ]
+currentDownloads = {}
 
 def uploadBookList():
 	books = []
@@ -34,8 +35,11 @@ def bookSize(book):
 	print(path)
 	return stat(path).st_size
 
-def transferData(book, chunkSize, actualChunk, isLast):
+def transferData(client, book, chunkSize, actualChunk, isLast):
 	# HACER HILOS PROBABLEMENTE
+	if (not client in currentDownloads):
+		currentDownloads[client] = []
+	currentDownloads[client].append(book)	
 	print("Transfiriendo data...")
 	path = "Libros/" + book + ".pdf"
 	file = open(path, "rb")
@@ -52,8 +56,6 @@ def booksList():
 
 def updateStatistics(option, name):
 	# REGION CRITICA
-	print(option)
-	print(name)
 	file = open(nameFileStatics, 'r')
 	statistics = file.readlines()
 	books      = literal_eval(statistics[0])
@@ -103,17 +105,23 @@ class Server:
 
 	# Muestra las estadisticas segun la opcion elegida
 	def showStatistics(self, option):
-		file = open(nameFileStatics, 'r')
-		statistics  = file.readlines()
-		data = literal_eval(statistics[int(option)-2])
-		elements = [(data[name], name) for name in data]
-		elements.sort(reverse = True)
-		x = 1
-		for val, name in elements:
-			print(str(x) + ". " + name + ": " + str(val))
-			x = x+1
-		print()
-		file.close()
+		if (option == 1):
+			for client in currentDownloads:
+				print(client)
+				for book in currentDownloads[client]:
+					print("\t" + book)
+		else:
+			file = open(nameFileStatics, 'r')
+			statistics  = file.readlines()
+			data = literal_eval(statistics[int(option)-2])
+			elements = [(data[name], name) for name in data]
+			elements.sort(reverse = True)
+			x = 1
+			for val, name in elements:
+				print(str(x) + ". " + name + ": " + str(val))
+				x = x+1
+			print()
+			file.close()
 
 	def run(self):
 		while (True):
@@ -126,7 +134,7 @@ class Server:
 				print("Opcion invalida")
 				continue
 			if  (option == '1'):
-				print("No se todavia :(")
+				self.showStatistics(option)
 			else:
 				self.showStatistics(option)
 
