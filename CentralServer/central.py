@@ -6,19 +6,39 @@ import xmlrpclib
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from ast import *
 
+
+'''
+Archivo que tiene las implementaciones de las clases principales utilizadas por el servidor central
+y la clase correspondiente.
+'''
+
 nameFile = 'statistics.txt'
 messages = [ "1. Libros solicitados por servidor de descarga.",
 			 "2. Numero de clientes atendidos por servidor de descarga.",
 			 "3. Servidores de descarga que se han caido." ]
 
+
+'''
+Metodo que dado un cliente lo registra en el servidor central
+
+client: cliente que se registrara en el servidor.
+'''
 def registerClient(client):
 	clients.append(client)
 	return "ok"
 
+'''
+Metodo que dado un servidor de descarga lo registra en el servidor central
+
+server: servidor que sera registrado en el servidor
+'''
 def registerServer(server):
 	servers.append(server)
 	return "ok"
 
+'''
+Metodo que retorna todos los libros de los servidores asociados al central
+'''
 def serversBooks():
 	print("Client is in serversBooks")
 	allBooks = []
@@ -31,9 +51,20 @@ def serversBooks():
 			allBooks.append([])
 	return allBooks
 
+'''
+Metodo que retorna todos los servidores conectados en el central
+'''
 def getServers():
 	return servers
 
+'''
+Clase que actualiza las estadisticas del servidor central al ser llamada remotamente desde
+algun servidor de descarga.
+
+option: opcion a actualizar
+server: servidor que actualiza la opcion
+book: nombre del libro
+'''
 # Tipos de updates:
 # 0 -> Se solicitud un libro a un servidor
 # 1 -> Un servidor atendio a un cliente
@@ -66,6 +97,14 @@ def updateStatistics(option, server, book = ""):
 	file.close()
 	return "ACK"
 
+'''
+Metodo para hacer la solicitud de un libro, al hacer la solicitud el servidor central busca
+todas las ocurrencias del mismo en los servidores de descarga y retorna una lista al cliente
+con los servidores disponibles.
+
+clientName: cliente que solicita el libro
+book: nombre del libro
+'''
 def requestBook(clientName, book):
 	# CREO QUE TENEMOS QUE PONER ESTO EN UN HILO PARA QUE SEA CONCURRENTE
 	print("Client: " + str(clientName) + " is resquesting a book")
@@ -80,9 +119,10 @@ def requestBook(clientName, book):
 			continue
 	return availableServers
 
-
-# Clase del servidor Central que escucha las peticiones
-# (con hilos)
+'''
+Clase de servidor central encargada de escuchar las peticiones y registrar sus funciones
+para ser invocadas. 
+'''
 class CentralServer(threading.Thread):
 	def run(self):
 		server  = SimpleXMLRPCServer(("localhost", 8000))
@@ -94,9 +134,15 @@ class CentralServer(threading.Thread):
 		server.register_function(serversBooks,     "serversBooks")
 		server.serve_forever()
 
-
+'''
+Clase que se encarga de llevar la linea de comandos del servidor central.
+'''
 class Summary():
-	# Muestra las estadisticas segun la opcion elegida
+	'''
+	Metodo para mostrar las estadisticas del servidor dada una opcion.
+
+	option: opcion seleccionada.
+	'''
 	def showStatistics(self, option):
 		file = open(nameFile, 'r')
 		statistics  = file.readlines()
@@ -112,7 +158,9 @@ class Summary():
 		print()
 		file.close()
 
-	# Interaccion del servidor central
+	'''
+	Metodo principal para la interaccion con el servidor central.
+	'''
 	def run(self):
 		while (True):
 			print("Elija un opcion: ")

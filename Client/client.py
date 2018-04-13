@@ -7,11 +7,21 @@ from sys import exit
 import socket
 
 
+'''
+Clase cliente, posee metodos para transferir datos, descargar libros y conectar al servidor central.
+'''
+
 centralServerDir = "http://159.90.9.10:9513"
 messages = [ "1. Listar libros.",
 			 "2. Solicitar libro." ]
 
+'''
+Metodo transfer Data, utilizado para hacer las llamadas a los servidores a traves
+de un map el cual realiza llamadas asincronas a cada uno de los servidores con cada parametro 
+especificado en params.
 
+params: arreglo de parametros para realizar la transferencia.
+'''
 def transferData(params):
 	server         = params[0] 
 	clientName     = params[1]
@@ -39,7 +49,10 @@ def transferData(params):
 	print("No se logro establecer conexion con el servidor de descarga " + server + ".")
 	return False
 
-
+'''
+Clase principal cliente, cuenta con un constructor el cual recibe el nombre 
+se registra en el servidor central e inicia el menu para recibir comandos.
+'''
 class Client:
 	def __init__(self, central = centralServerDir,):
 		name = raw_input("Ingrese su nombre: ")
@@ -52,6 +65,13 @@ class Client:
 			print("No se logro establecer conexion con el servidor central.")
 			exit()
 
+	'''
+	Metodo downloadBook el cual dado un libro se encarga de llamar al servidor central solicitando
+	la informacion de los servidores que contienen el libro, luego hace una solicitud en bloques a 
+	los servidores que lo contienen para realizar la descarga de forma multiple.
+
+	book: Nombre del libro a descargar. 
+	'''
 	def downloadBook(self, book):
 		try:
 			servers = self.proxy.requestBook(self.clientName, book)
@@ -122,10 +142,6 @@ class Client:
 				actualChuncks = [ i + 1 for i in range(len(servers)) if results[i] == False]				
 				if (not actualChuncks):
 					break
-
-				
-
-				
 			for data in fileChunks:
 					downloadFile.write(data)
 			downloadFile.close()
@@ -136,6 +152,12 @@ class Client:
 				print("No se logro establecer conexion con ningun servidor de descarga.")
 				print("Descarga fallida de " + book + ".")
 
+
+	'''
+	Metodo para obtener los libros de los servidores registrados en el central,
+	este solicita los libros por servidor y para cada uno de ellos muestra la lista
+	asociada.
+	'''
 	def getBooks(self):
 		serversBooks = self.proxy.serversBooks()
 		servers      = self.proxy.getServers()
@@ -150,6 +172,11 @@ class Client:
 					print("\t" + book)
 			print
 
+	'''
+	Metodo principal de la clase el cual activa el menu en terminal en un loop infinito
+	recibe las solicitudes y hace la llamada a los metodos respectivos, en caso de descargar un
+	libro lo hace concurrentemente con threading.
+	'''
 	def run(self):
 		while (True):
 			print("Elija un opcion: ")

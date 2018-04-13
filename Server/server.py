@@ -9,6 +9,10 @@ from os import stat,walk
 from ast import literal_eval
 from sys import exit
 
+'''
+Archivo que implementa la clase servidor de descarga, encargado de proporcionar los
+metodos utilizados para descargar un libro y solicitar sus datos.
+'''
 class AsyncXMLRPCServer(SocketServer.ThreadingMixIn,SimpleXMLRPCServer): pass
 
 centralServerDir = "http://localhost:8000"
@@ -19,6 +23,9 @@ messages = [ "1. Libros en descarga.",
 			 "3. Estadisticas de clientes." ]
 currentDownloads = {}
 
+'''
+Metodo utilizado para cargar la lista de libros en el directorio y notificar al servidor central. 
+'''
 def uploadBookList():
 	books = []
 	for root,dir,file in walk("Libros"):
@@ -26,21 +33,39 @@ def uploadBookList():
 			books.append(f.split('.')[0])
 	return books
 
+'''
+Metodo para revisar si un libro existe en el servidor.
+
+book: libro a revisar.
+'''
 def checkBook(book):
-	# HACER HILOS PROBABLEMENTE
 	print("checking book in server")
 	for b in server.books:
 		if (b == book):
 			return True
 	return False
 
+'''
+Metodo que retorna el tam de un libro en el servidor.
+
+book: libro a revisar.
+'''
 def bookSize(book):
 	path = "Libros/" + book + ".pdf"
 	print(path)
 	return stat(path).st_size
 
+'''
+Metodo que se encarga de transferir data entre un cliente, un libro y un trozo del mismo especificado
+por los parametros chunkSize y actualChunk
+
+client: cliente al que se transferiran los archivos
+book: libro a transferir
+chunkSize: tamanho del bloque a transferir
+actualChunk: bloque por el cual va la descarga
+isLast: booleano para saber si es el ultimo bloque.
+'''
 def transferData(client, book, chunkSize, actualChunk, isLast):
-	# HACER HILOS PROBABLEMENTE
 	if (not client in currentDownloads):
 		currentDownloads[client] = []
 	currentDownloads[client].append(book)	
@@ -55,11 +80,21 @@ def transferData(client, book, chunkSize, actualChunk, isLast):
 	file.close()
 	return Binary(f)
 
+
+'''
+Metodo que retorna la lista de libros del servidor
+'''
 def booksList():
 	return server.books
 
+'''
+Metodo para actualizar las estadisticas del servidor 
+
+option: estadistica que se actualizara
+clientName: cliente que realizo la solicitud
+bookName: libro que descargo el cliente
+'''
 def updateStatistics(option, clientName, bookName):
-	# REGION CRITICA
 	file = open(nameFileStatics, 'r')
 	statistics = file.readlines()
 	books      = literal_eval(statistics[0])
@@ -87,6 +122,11 @@ def updateStatistics(option, clientName, bookName):
 	file.close()
 	return "ACK"
 
+
+'''
+Clase principal de servidor de descarga la cual asocia los metodos necesarios en el servidor central
+el cual se encarga de convertirlos en XML y tenerlos disponibles para el cliente.
+'''
 class DownloadServer(threading.Thread):
 	def run(self):
 		server = AsyncXMLRPCServer(("localhost", 8121), SimpleXMLRPCRequestHandler)
@@ -97,6 +137,10 @@ class DownloadServer(threading.Thread):
 		server.register_function(updateStatistics, "updateStatistics")
 		server.serve_forever()
 
+'''
+Clase servidor, inicia la conexion con el servidor central en el constructor, carga la clase de libros
+y se queda escuchando solicitudes del cliente.
+'''
 class Server:
 	def __init__(self, central = centralServerDir, server = serverDir):
 		try:
@@ -109,12 +153,19 @@ class Server:
 			print("No se logro establecer conexion con el servidor central.")
 			exit()
 
+	'''
+	Metodo que imprime la lista de liibros que tiene el servidor
+	'''
 	def printBooks(self):
 		print("Los libros disponibles son: ")
 		for book in self.books:
 			print(book)
 
-	# Muestra las estadisticas segun la opcion elegida
+	'''
+	Metodo que muestra las estadisticas segun la opcion elegida
+
+	option: opcion elegida del cliente
+	'''
 	def showStatistics(self, option):
 		if (option == '1'):
 			for client in currentDownloads:
@@ -134,6 +185,9 @@ class Server:
 			print()
 			file.close()
 
+	'''
+	Metodo principal para correr el servidor y mostrar las opciones en el terminal
+	'''
 	def run(self):
 		while (True):
 			print("Elija un opcion: ")
